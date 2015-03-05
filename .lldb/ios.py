@@ -272,6 +272,26 @@ def show_stacktrace(debugger, command, result, internal_dict):
         print str(frame)
 
 
+
+#############################################################################
+# IOS specific stuff                                                        #
+#############################################################################
+
+
+def show_directories(debugger, command, result, internal_dict):
+    target = debugger.GetSelectedTarget()
+    process = target.GetProcess()
+    thread = process.GetSelectedThread()
+    frame = thread.GetFrameAtIndex(0)
+
+    # NSDocumentDirectory = 9 ; NSUserDomainMask = 1
+    path = frame.EvaluateExpression('(NSString *)[NSSearchPathForDirectoriesInDomains(9, 1, YES) lastObject]').GetObjectDescription()
+    print("Document path: {0}".format(path))
+
+    path = frame.EvaluateExpression('(NSString *)NSTemporaryDirectory()').GetObjectDescription()
+    print("Temporary path: {0}".format(path))
+
+
 #############################################################################
 # Main                                                                      #
 #############################################################################
@@ -284,3 +304,4 @@ def __lldb_init_module(debugger, internal_dict):
     debugger.HandleCommand('command script add -f ios.show_hexdump xd')
     debugger.HandleCommand('command script add -f ios.show_displaydumppointers ddp')
     debugger.HandleCommand('command script add -f ios.show_memorymap map')
+    debugger.HandleCommand('command script add -f ios.show_directories directories')
